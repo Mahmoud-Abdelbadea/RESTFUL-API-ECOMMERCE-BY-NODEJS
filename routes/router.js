@@ -1,0 +1,28 @@
+const router = require('./categoryRoute')
+const routerSubCategory=require('./subCategoryRoute')
+const routerBrand = require('./brandRoute')
+const routerProducts = require('./productRoute')
+const routerReview=require('./reviewRoute')
+const routerAuth = require('./authRoute')
+const routeruser=require('./userRoute')
+const routeAdresses=require('./addressRoute')
+const routeWishlist=require('./wishlistRoute')
+const routeCoupon=require('./couponRoute')
+const routeCart=require('./cartRoute')
+const routeOrder=require('./orderRoute')
+exports.allRoutes=(app)=>{
+app.use('/api/v1/auth',routerAuth)
+
+app.use('/api/v1', routerSubCategory)
+app.use('/api/v1', router)
+app.use('/api/v1', routerBrand)
+app.use('/api/v1',routerReview)
+app.use('/api/v1', routerProducts)
+app.use('/api/v1',routeWishlist )
+app.use('/api/v1',routeAdresses )
+app.use('/api/v1',routeruser)
+app.use('/api/v1', routeCoupon)
+app.use('/api/v1',routeCart)
+app.use('/api/v1',routeOrder)
+
+}
