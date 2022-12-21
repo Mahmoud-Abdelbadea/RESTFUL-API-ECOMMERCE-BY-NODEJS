@@ -13,6 +13,7 @@ const dbconection = require("./config/database")
 
 const {allRoutes}=require('./routes/router')
 
+const {webhookCheckout}=require('./controllers/orderControllers')
 
 dbconection()
 const app = express()
@@ -27,6 +28,12 @@ if (process.env.NODE_ENV === "Development") {
 
 
 }
+app.post(
+    '/check-webhook',
+    express.raw({ type: 'application/json' }),
+    webhookCheckout
+  );
+  
 
 allRoutes(app)
 
@@ -39,7 +46,7 @@ app.use(globalError)
 
 
 const PORT = process.env.PORT || 3000
-const server=app.listen(8500, () => {
+const server=app.listen(PORT, () => {
     console.log(`App running ${PORT}`)
 })
 // Handling rejection out express

@@ -120,6 +120,8 @@ exports.updateOrderToDelivered = asyncHandler(async (req, res, next) => {
 // @desc    Get checkout session from stripe and send it as response
 // @route   GET /api/v1/orders/checkout-session/cartId
 // @access  Protected/User
+
+
 exports.checkoutSession = asyncHandler(async (req, res, next) => {
   // app settings
   const taxPrice = 0;
@@ -142,17 +144,24 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
 
   // 3) Create stripe checkout session
   const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        name: req.user.name,
-        amount: totalOrderPrice * 100,
-        currency: 'egp',
+   
+      
+      line_items: [{
+  
+        price_data: {
+          currency: 'egp',
+          unit_amount: totalOrderPrice * 100,
+          product_data: {
+            name: req.user.name,
+       
+          },
+        },
         quantity: 1,
-      },
-    ],
+      }],
+    
     mode: 'payment',
-    success_url: `${req.protocol}://${req.get('host')}/orders`,
-    cancel_url: `${req.protocol}://${req.get('host')}/cart`,
+    success_url: `${req.protocol}://${req.get('host')}/order`,
+    cancel_url: `${req.protocol}://${req.get('host')}/Cart`,
     customer_email: req.user.email,
     client_reference_id: req.params.cartId,
     metadata: req.body.shippingAddress,
@@ -160,5 +169,61 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
 
   // 4) send session to response
   res.status(200).json({ status: 'success', session });
+});
+
+const createCardOrder = async (session) => {
+  const cartId = session.client_reference_id;
+  const shippingAddress = session.metadata;
+  const orderPrice = session.amount_total / 100;
+
+  const cart = await Cart.findById(cartId);
+  const user = await User.findOne({ email: session.customer_email });
+
+  // 3) Create order with default paymentMethodType card
+  const order = await Order.create({
+    user: user._id,
+    cartItems: cart.cartItems,
+    shippingAddress,
+    totalOrderPrice: orderPrice,
+    isPaid: true,
+    paidAt: Date.now(),
+    paymentMethodType: 'card',
+  });
+
+  // 4) After creating order, decrement product quantity, increment product sold
+  if (order) {
+    const bulkOption = cart.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+      },
+    }));
+    await Product.bulkWrite(bulkOption, {});
+
+  
+    await Cart.findByIdAndDelete(cartId);
+  }
+};
+
+exports.webhookCheckout = asyncHandler(async (req, res, next) => {
+  const sig = req.headers['stripe-signature'];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK
+    );
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    //  Create order
+    createCardOrder(event.data.object);
+  }
+
+  res.status(200).json({ received: true });
 });
 
