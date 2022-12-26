@@ -11,7 +11,7 @@ Express,MongoDB,Mongoose
 <li>Validating Request body Using express-validator package</li>
 <li>Forget password by a reset token sent to given email address.</li>
 <li>use nodemailer package and send email by sendGrid</li>
-<li> payment by using stripe </li>
+<li> integration with stripe</li>
 <li>use mongoose middleware</li>
 <li>use filter,search,pagnation,sort with data</li>
 <li>use render to deploy project</li>
