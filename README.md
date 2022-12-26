@@ -1,7 +1,7 @@
 # E-COMMERCE
 RESTFUL API TO E-COMMERCE BY NODEJS
 ## Technology Used:
-Express,MongoDB,Mongoose
+Javascript,Nodejs,Express,MongoDB,Mongoose
 
 ## Features
 <ul>
