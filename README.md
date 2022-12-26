@@ -10,7 +10,7 @@ Express,MongoDB,Mongoose
 <li>Ability to Upload images with the API Using Multer package </li>
 <li>Validating Request body Using express-validator package</li>
 <li>Forget password by a reset token sent to given email address.</li>
-<li>use nodemailer package and send email by sendGrid<li>
+<li>use nodemailer package and send email by sendGrid</li>
 <li> payment by using stripe </li>
 <li>use mongoose middleware</li>
 <li>use filter,search,pagnation,sort with data</li>
